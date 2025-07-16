@@ -4,18 +4,19 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
-import os
-from flask_cors import CORS # NEW: Import CORS
+import os # Import os for environment variables
+import json # Import json for stringifying the config
+from flask_cors import CORS # Import CORS for cross-origin requests
 
 # Initialize the Flask application
 app = Flask(__name__)
-CORS(app) # NEW: Enable CORS for your Flask app. This allows cross-origin requests.
+CORS(app) # Enable CORS for your Flask app. This allows your frontend to fetch data.
 
 # --- Global variables for the recommendation system ---
 movies_df = None
 tfidf_vectorizer = None
 cosine_sim_matrix = None
-movie_titles = []
+movie_titles = [] # List of movie titles for the dropdown/suggestions
 
 def load_and_process_data():
     """
@@ -86,11 +87,28 @@ def get_recommendations(movie_title, cosine_sim=None, df=None, num_recommendatio
 def index():
     """
     Renders the main HTML page for the recommendation system.
-    Passes the list of available movie titles to the template.
+    Passes the list of available movie titles AND Firebase config to the template.
     """
     if movies_df is None:
         load_and_process_data()
-    return render_template('index.html', movie_titles=movie_titles)
+
+    # 
+    firebase_config = {
+        "apiKey": os.environ.get("AIzaSyBwKt2UU5zPbPnK_YPzWNs1Nlh2eOVphl8"),
+        "authDomain": os.environ.get("moveirecommendation.firebaseapp.com"),
+        "projectId": os.environ.get("moveirecommendation"),
+        "storageBucket": os.environ.get("moveirecommendation.firebasestorage.app"),
+        "messagingSenderId": os.environ.get("109348923691"),
+        "appId": os.environ.get("1:109348923691:web:a9bd2bdd61b9ee5c72bd6e"),
+        "measurementId": os.environ.get("G-RPD89ZXNJ7") 
+    }
+    # Convert the Python dict to a JSON string to pass to the template
+    firebase_config_json = json.dumps(firebase_config)
+
+    # Pass both movie_titles and firebase_config_json to the template
+    return render_template('index.html',
+                           movie_titles=movie_titles,
+                           firebase_config=firebase_config_json)
 
 @app.route('/recommend', methods=['POST'])
 def recommend():
