@@ -1,4 +1,4 @@
-Movie Recommender
+CineSense: Movie Recommender
 This application helps users discover and rate films based on their preferences, aiding casual watchers and enthusiasts in finding new content.
 
 Features
