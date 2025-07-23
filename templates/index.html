@@ -3,55 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Movie Recommender</title>
+    <title>CineSense</title> 
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='my_logo.png') }}" type="image/png">
     <!-- Tailwind CSS CDN for easy styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for star icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Google Fonts - Inter for general text, Dancing Script for cursive heading, and Quicksand for cute block letters -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Dancing+Script:wght@700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     <style>
         /* Custom CSS to complement Tailwind and provide specific styles */
         body {
-            font-family: 'Inter', sans-serif; /* Default font for body */
-            background-color: #FFECF0; /* Very light baby pink background */
+            font-family: 'Inter', sans-serif;
+            background-color: #1A2B4C;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
             margin: 0;
             padding: 1.5rem;
             box-sizing: border-box;
+            color: #FFFFFF;
         }
-        .container {
-            background-color: #FFD1DC; /* Baby pink container background */
-            padding: 3rem; /* More padding */
-            border-radius: 1.5rem; /* More rounded corners */
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); /* Stronger shadow */
+        .header-container {
+            background-color: #0A192F;
+            padding: 2rem 3rem; 
+            border-radius: 1.5rem; 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2); /* Stronger shadow */
             text-align: center;
-            max-width: 700px; /* Wider container */
+            max-width: 900px;
             width: 100%;
-            position: relative; /* Needed for absolute positioning of suggestions */
+            margin-bottom: 2rem; 
         }
         .logo {
             margin-bottom: 1.5rem;
-            max-width: 150px; /* Limit logo size */
+            max-width: 150px; 
             height: auto;
-            border-radius: 0.5rem; /* Rounded corners for logo */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle shadow for logo */
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
         }
         h1 {
-            font-family: 'Dancing Script', cursive; /* Apply cursive font to heading */
-            color: #000000; /* Black text */
-            font-size: 6.5rem; /* Increased font size for the main title */
-            font-weight: 700; /* Bold cursive */
+            font-family: 'Dancing Script', cursive; 
+            color: #FFFFFF; 
+            font-size: rem; 
+            font-weight: 700; 
             margin-bottom: 1rem;
             line-height: 1.2;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* Subtle text shadow */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
         p {
-            font-family: 'Quicksand', sans-serif; /* Cute looking block letter font for paragraph */
-            color: #000000; /* Black text */
-            font-size: 1.5rem; /* Slightly increased font size for paragraph */
-            font-weight: 700; /* Make it bold for more impact */
+            font-family: 'Quicksand', sans-serif; 
+            color: #FFFFFF; 
+            font-size: 1.5rem; 
+            font-weight: 700; 
             margin-bottom: 2.5rem;
         }
         .input-group {
@@ -60,302 +65,826 @@
         }
         input[type="text"] {
             width: 100%;
-            padding: 1rem 1.25rem; /* More padding in input */
-            border-radius: 0.75rem; /* Rounded input */
-            border: 2px solid #cbd5e0; /* Stronger border */
-            background-color: #f7fafc; /* Very light background */
+            padding: 1rem 1.25rem; 
+            border-radius: 0.75rem; 
+            border: 2px solid #4A5568; 
+            background-color: #FFFFFF; 
             font-size: 1.1rem;
-            color: #000000; /* Black text */
+            color: #000000; 
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            outline: none; /* Remove default outline */
+            outline: none; 
         }
         input[type="text"]:focus {
-            border-color: #4299e1; /* Blue border on focus */
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.3); /* Blue glow on focus */
+            border-color: #63B3ED; 
+            box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.5); 
         }
+        
         .suggestions-list {
-            position: absolute;
-            top: 100%; /* Position below the input */
-            left: 0;
-            right: 0;
-            background-color: #ffffff;
-            border: 1px solid #e2e8f0;
+            display: none; 
+        }
+        .action-button {
+            background-color: #AAB8C2; 
+            color: #89CFF0; 
+            padding: 1rem 2.5rem; 
             border-radius: 0.75rem;
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-            max-height: 250px; /* Limit height for scrollability */
-            overflow-y: auto; /* Enable scrolling */
-            z-index: 10; /* Ensure it's above other content */
-            list-style: none; /* Remove default list style */
-            padding: 0;
-            margin-top: 0.5rem; /* Small gap between input and suggestions */
-        }
-        .suggestions-list li {
-            padding: 0.75rem 1.25rem;
-            text-align: left;
-            cursor: pointer;
-            color: #000000; /* Black text */
-            font-size: 1rem;
-            border-bottom: 1px solid #edf2f7; /* Light separator */
-        }
-        .suggestions-list li:last-child {
-            border-bottom: none;
-        }
-        .suggestions-list li:hover, .suggestions-list li.selected {
-            background-color: #ebf8ff; /* Light blue on hover/selection */
-            color: #2b6cb0; /* Darker blue text */
-        }
-        button {
-            background-color: #3182ce; /* Darker blue button */
-            color: #ffffff;
-            padding: 1rem 2.5rem; /* Larger button */
-            border-radius: 0.75rem;
-            font-weight: 700; /* Bold */
+            font-weight: 700; 
             transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
             cursor: pointer;
             border: none;
-            box-shadow: 0 5px 15px rgba(49, 130, 206, 0.4); /* Stronger button shadow */
-            letter-spacing: 0.05em; /* Slight letter spacing */
-            text-transform: uppercase; /* Uppercase text */
+            box-shadow: 0 5px 15px rgba(170, 184, 197, 0.4); 
+            letter-spacing: 0.05em; 
+            text-transform: uppercase; 
+            text-shadow: 0 0 5px rgba(255,255,255,0.5); 
         }
-        button:hover {
-            background-color: #2b6cb0; /* Even darker blue on hover */
-            transform: translateY(-2px); /* More pronounced lift */
-            box-shadow: 0 8px 20px rgba(49, 130, 206, 0.5);
+        .action-button:hover {
+            background-color: #98A7B4; 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 20px rgba(170, 184, 197, 0.5); 
         }
+
+        
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-auto-rows: minmax(100px, auto); 
+            gap: 1rem; 
+            width: 100%;
+            max-width: 1200px; 
+            margin-top: 2rem;
+        }
+
+        .movie-card {
+            background-color: #0A203F; 
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer; 
+            position: relative;
+        }
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .movie-card img {
+            width: 100%;
+            height: auto; 
+            display: block;
+            border-bottom: 1px solid #1A3050; 
+        }
+
+        .movie-card-content {
+            padding: 1rem;
+            color: #FFFFFF; 
+            text-align: left;
+            flex-grow: 1; 
+        }
+
+        .movie-card-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .movie-card-genres {
+            font-size: 0.9rem;
+            color: #AAB8C2; 
+        }
+        
         #selected-movie-details {
-            background-color: #FFC0CB; /* Pink background for details */
+            background-color: #0A203F; 
             padding: 1.5rem;
             border-radius: 0.75rem;
             margin-top: 2rem;
             text-align: left;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* Inner shadow */
-            color: #000000; /* Black text */
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); 
+            color: #FFFFFF; 
             font-size: 1.05rem;
             line-height: 1.6;
+            width: 100%;
+            max-width: 700px; 
+            display: none; 
         }
         #selected-movie-details strong {
-            color: #000000; /* Black text for strong */
+            color: #FFFFFF; 
         }
-        #recommendations-section {
+        /* Styles for the rating section */
+        .rating-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: #1A3050; 
+            border-radius: 0.75rem;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .rating-section label {
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 700;
+            color: #FFFFFF; 
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+        .rating-input-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .rating-input-group input[type="number"] {
+            width: 80px; 
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #4A5568; 
+            text-align: center;
+            font-size: 1.1rem;
+            color: #000000; 
+            background-color: #FFFFFF; 
+        }
+        .rate-button {
+            background-color: #63B3ED; 
+            color: #FFFFFF; 
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .rate-button:hover {
+            background-color: #4299E1; 
+        }
+        #user-ratings-section, #personalized-recommendations-section {
             margin-top: 2.5rem;
             padding-top: 2rem;
-            border-top: 1px solid #cbd5e0; /* Clearer separator */
+            border-top: 1px solid #4A5568; 
+            width: 100%;
+            max-width: 1200px;
         }
-        #recommendations-section h2 {
-            color: #000000; /* Black text */
-            font-size: 1.8rem; /* Larger heading */
+        #user-ratings-section h2, #personalized-recommendations-section h2 {
+            color: #FFFFFF; 
+            font-size: 1.8rem;
             font-weight: 700;
             margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        #user-ratings-list, #personalized-recommendations-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        #user-ratings-list li {
+            background-color: #0A203F; 
+            padding: 1rem 1.25rem;
+            border-radius: 0.75rem;
+            text-align: left;
+            color: #FFFFFF; 
+            font-size: 1.05rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        #user-ratings-list li strong {
+            color: #FFFFFF; 
         }
         #recommendations-list {
             list-style: none;
             padding: 0;
             margin: 0;
-            display: grid; /* Use CSS Grid for a nice two-column layout */
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive columns */
-            gap: 1rem; /* Space between grid items */
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 1rem;
         }
         #recommendations-list li {
-            background-color: #FFF0F5; /* Very light pink for list items */
-            padding: 1rem 1.25rem;
+            background-color: #0A203F;
+            padding: 1rem;
             border-radius: 0.75rem;
-            text-align: left;
-            color: #000000; /* Black text */
-            font-size: 1.2rem; /* Increased font size for recommended movies */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08); /* More prominent shadow */
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-align: center;
+            color: #FFFFFF;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        #recommendations-list li:hover {
-            transform: translateY(-3px); /* Lift effect on hover */
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+        #recommendations-list li img {
+            width: 100px; 
+            height: 150px; 
+            object-fit: cover; 
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-        #loading-indicator, #error-message {
-            margin-top: 1.5rem;
+        #recommendations-list li span {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        #loading-more-indicator {
+            margin-top: 2rem;
             font-size: 1.1rem;
-        }
-        #loading-indicator {
-            color: #4299e1;
-        }
-        .error-message {
-            color: #e53e3e;
+            color: #63B3ED;
+            display: none; 
         }
         .hidden {
             display: none;
         }
+
+        /* --- Modal Styles --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #0A192F;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            color: #AAB8C2;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .modal-close-btn:hover {
+            color: #FFFFFF;
+        }
+        .modal-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .modal-poster {
+            width: 150px;
+            height: 225px;
+            border-radius: 0.5rem;
+            object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            flex-shrink: 0; 
+        }
+        .modal-title-group {
+            flex-grow: 1;
+        }
+        .modal-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #89CFF0;
+            margin-bottom: 0.5rem;
+        }
+        .modal-meta-info {
+            font-size: 0.95rem;
+            color: #AAB8C2;
+            margin-bottom: 0.5rem;
+        }
+        .modal-meta-info strong {
+            color: #FFFFFF;
+        }
+        .modal-overview {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #E0E6F6;
+            margin-bottom: 1.5rem;
+        }
+        /* Star Rating Styles */
+        .star-rating {
+            display: inline-block;
+            font-size: 1.8rem; 
+            color: #AAB8C2; 
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+        .star-rating .fas { 
+            color: #FFD700; 
+        }
+        .star-rating .far { 
+            color: #AAB8C2; 
+        }
+        .star-rating i {
+            transition: color 0.2s ease;
+        }
+        .star-rating i:hover,
+        .star-rating i.hovered {
+            color: #FFD700; 
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 768px) {
+            .header-container {
+                padding: 1.5rem 1rem;
+            }
+            h1 {
+                font-size: 4rem;
+            }
+            p {
+                font-size: 1.2rem;
+            }
+            .action-button {
+                padding: 0.8rem 2rem;
+            }
+            .movie-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+            .modal-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .modal-poster {
+                width: 120px;
+                height: 180px;
+            }
+            .modal-title {
+                font-size: 2rem;
+            }
+            .modal-meta-info {
+                font-size: 0.85rem;
+            }
+            .modal-overview {
+                font-size: 0.9rem;
+            }
+            .star-rating {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="header-container">
         <!-- Logo added here -->
-        <!-- IMPORTANT: Replace 'your_logo_filename.png' with the actual name of your image file -->
         <img src="{{ url_for('static', filename='my_logo.png') }}" alt="Movie Recommender Logo" class="logo mx-auto">
 
-        <h1>Movie Recommender</h1>
-        <p>Discover your next favorite movie based on similar genres!</p>
+        <h1>CineSense</h1> <!-- Changed title here -->
+        <p>Type to filter movies or scroll to browse!</p>
 
         <div class="input-group">
             <label for="movie-search" class="sr-only">Search for a movie:</label>
-            <input type="text" id="movie-search" placeholder="Type a movie title..." autocomplete="off">
+            <input type="text" id="movie-search" placeholder="Filter movies by title or genre..." autocomplete="off">
             <ul id="suggestions-list" class="suggestions-list hidden"></ul>
         </div>
 
-        <button id="get-recommendations-btn">Get Recommendations</button>
+        <button id="get-recommendations-btn" class="action-button">Get Similar Recommendations</button>
 
         <div id="loading-indicator" class="hidden">Loading recommendations...</div>
         <div id="error-message" class="error-message hidden"></div>
+    </div>
 
-        <!-- Section to display details of the selected movie -->
-        <div id="selected-movie-details" class="hidden">
-            <strong>Selected Movie:</strong> <span id="selected-movie-title"></span><br>
-            <strong>Genres:</strong> <span id="selected-movie-genres"></span>
-        </div>
-
-        <!-- Section to display recommendations, initially hidden -->
-        <div id="recommendations-section" class="hidden">
-            <h2>Recommended Movies:</h2>
-            <ul id="recommendations-list">
-                <!-- Recommendations will be dynamically inserted here by JavaScript -->
-            </ul>
+    <!-- Section to display details of the selected movie (now hidden, replaced by modal) -->
+    <div id="selected-movie-details" class="hidden">
+        <strong>Selected Movie:</strong> <span id="selected-movie-title"></span><br>
+        <strong>Genres:</strong> <span id="selected-movie-genres"></span>
+        
+        <!-- Rating Section (will be moved to modal) -->
+        <div class="rating-section mt-4 hidden">
+            <label for="rating-input">Rate this movie (1-5):</label>
+            <div class="rating-input-group">
+                <input type="number" id="rating-input" min="1" max="5" value="3">
+                <button id="rate-movie-btn" class="rate-button">Rate</button>
+            </div>
+            <div id="rating-message" class="text-sm text-gray-700 mt-2"></div>
         </div>
     </div>
 
-    <script>
-        // Global variable to store all movie titles and their genres, fetched once.
-        let allMovieTitlesAndGenres = [];
+    <!-- Main content area for movie cards serving as suggestions -->
+    <div id="movie-cards-container" class="movie-grid">
+        <!-- Movie cards will be dynamically inserted here -->
+    </div>
 
-        // Fetch all movie titles and genres from the backend on page load
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Attach event listener to the "Get Recommendations" button
-            document.getElementById('get-recommendations-btn').addEventListener('click', getRecommendations);
+    <div id="loading-more-indicator" class="hidden">Loading more movies...</div>
+
+    <!-- Section to display personalized recommendations -->
+    <div id="personalized-recommendations-section" class="hidden">
+        <h2>Personalized Recommendations:</h2>
+        <ul id="personalized-recommendations-list" class="movie-grid">
+            <!-- Personalized recommendations will be dynamically inserted here by JavaScript -->
+        </ul>
+        <div id="no-personalized-recs-message" class="text-gray-500 mt-2 hidden text-center">Rate a few movies to get personalized recommendations!</div>
+    </div>
+
+    <!-- Section to display recommendations (Similar Movies), initially hidden -->
+    <div id="recommendations-section" class="hidden">
+        <h2>Similar Movies:</h2>
+        <ul id="recommendations-list" class="movie-grid">
+            <!-- Recommendations will be dynamically inserted here by JavaScript -->
+        </ul>
+    </div>
+
+    <!-- Section to display user's past ratings -->
+    <div id="user-ratings-section" class="hidden">
+        <h2>Your Past Ratings:</h2>
+        <ul id="user-ratings-list">
+            <!-- User's ratings will be inserted here by JavaScript -->
+        </ul>
+        <div id="no-ratings-message" class="text-gray-500 mt-2 hidden text-center">You haven't rated any movies yet.</div>
+    </div>
+
+    <!-- Movie Details Modal -->
+    <div id="movie-details-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+            <div class="modal-header">
+                <img id="modal-poster" src="" alt="Movie Poster" class="modal-poster">
+                <div class="modal-title-group">
+                    <h2 id="modal-title" class="modal-title"></h2>
+                    <p id="modal-meta-info" class="modal-meta-info"></p>
+                    <p id="modal-director" class="modal-meta-info"></p>
+                    <p id="modal-cast" class="modal-meta-info"></p>
+                </div>
+            </div>
+            <p id="modal-overview" class="modal-overview"></p>
+
+            <!-- Star Rating Section in Modal -->
+            <div class="rating-section flex flex-col items-center">
+                <label for="modal-rating-input" class="mb-2">Rate this movie:</label>
+                <div class="star-rating" data-current-rating="0">
+                    <i class="far fa-star" data-value="1"></i>
+                    <i class="far fa-star" data-value="2"></i>
+                    <i class="far fa-star" data-value="3"></i>
+                    <i class="far fa-star" data-value="4"></i>
+                    <i class="far fa-star" data-value="5"></i>
+                </div>
+                <button id="modal-rate-movie-btn" class="rate-button mt-4">Submit Rating</button>
+                <div id="modal-rating-message" class="text-sm text-gray-400 mt-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { getFirestore, doc, setDoc, collection, query, where, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+        // Firebase configuration object
+        const firebaseConfig = {
+            apiKey: "AIzaSyBwKt2UU5zPbPnK_YPzWNs1Nlh2eOVphl8", 
+            authDomain: "moveirecommendation.firebaseapp.com", 
+            projectId: "moveirecommendation", 
+            storageBucket: "moveirecommendation.firebasestorage.app", 
+            messagingSenderId: "109348923691", 
+            appId: "1:109348923691:web:a9bd2bdd61b9ee5c72bd6e", 
+            measurementId: "G-RPD89ZXNJ7" 
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null; // To store the authenticated user object
+        let userId = null; // To store the user's UID
+        let userRatedMovies = []; // To store the user's ratings for personalized recommendations
+
+        // Authenticate anonymously when the page loads
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                userId = user.uid;
+                console.log("Firebase: Authenticated anonymously. User ID:", userId);
+                loadUserRatings(); // Load ratings and then trigger personalized recommendations
+            } else {
+                signInAnonymously(auth)
+                    .then(() => {
+                        console.log("Firebase: Signed in anonymously.");
+                    })
+                    .catch((error) => {
+                        console.error("Firebase Error: Error signing in anonymously:", "Please check your firebaseConfig. If you are just testing the UI, this error can be ignored for now.", error);
+                        document.getElementById('error-message').textContent = 'Error authenticating Firebase. Check console for details. UI might still work for recommendations.';
+                        document.getElementById('error-message').classList.remove('hidden');
+                    });
+            }
+        });
+
+        // --- Global State for Movies and Pagination ---
+        let allLoadedMovies = []; // Stores all movies currently loaded from the backend
+        let displayedMovies = []; // Stores movies currently visible after search/filter
+        let currentOffset = 0;
+        const moviesPerLoad = 20; // Number of movies to fetch per API call for infinite scroll
+        let isLoadingMovies = false; // Flag to prevent multiple simultaneous fetch calls
+        let hasMoreMovies = true; // Flag to indicate if there are more movies on the backend
+
+        // --- DOM Elements ---
+        const movieSearchInput = document.getElementById('movie-search');
+        const getRecommendationsBtn = document.getElementById('get-recommendations-btn');
+        const movieCardsContainer = document.getElementById('movie-cards-container');
+        const loadingMoreIndicator = document.getElementById('loading-more-indicator');
+        const recommendationsSection = document.getElementById('recommendations-section');
+        const recommendationsList = document.getElementById('recommendations-list');
+        const userRatingsSection = document.getElementById('user-ratings-section');
+        const userRatingsList = document.getElementById('user-ratings-list');
+        const noRatingsMessage = document.getElementById('no-ratings-message');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const errorMessage = document.getElementById('error-message');
+
+        // Modal Elements
+        const movieDetailsModalOverlay = document.getElementById('movie-details-modal-overlay');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const modalPoster = document.getElementById('modal-poster');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMetaInfo = document.getElementById('modal-meta-info');
+        const modalDirector = document.getElementById('modal-director');
+        const modalCast = document.getElementById('modal-cast');
+        const modalOverview = document.getElementById('modal-overview');
+        const modalRateMovieBtn = document.getElementById('modal-rate-movie-btn');
+        const modalRatingMessage = document.getElementById('modal-rating-message');
+        const starRatingContainer = document.querySelector('.star-rating');
+        const personalizedRecommendationsSection = document.getElementById('personalized-recommendations-section');
+        const personalizedRecommendationsList = document.getElementById('personalized-recommendations-list');
+        const noPersonalizedRecsMessage = document.getElementById('no-personalized-recs-message');
+
+        let selectedMovieForRating = null; // To store the title of the movie currently in the modal
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOM Content Loaded. Initializing event listeners and fetching movies.");
+            getRecommendationsBtn.addEventListener('click', getSimilarRecommendations);
+            movieSearchInput.addEventListener('input', handleSearchInput);
+            window.addEventListener('scroll', handleInfiniteScroll);
+            
+            // Modal event listeners
+            modalCloseBtn.addEventListener('click', closeModal);
+            movieDetailsModalOverlay.addEventListener('click', (e) => {
+                if (e.target === movieDetailsModalOverlay) {
+                    closeModal();
+                }
+            });
+
+            // Star Rating Event Listeners
+            starRatingContainer.addEventListener('mouseover', handleStarHover);
+            starRatingContainer.addEventListener('mouseout', handleStarOut);
+            starRatingContainer.addEventListener('click', handleStarClick);
+            modalRateMovieBtn.addEventListener('click', rateMovie);
+
+            // Initial load of movies for the grid
+            fetchMoviesForGrid(currentOffset, moviesPerLoad);
+        });
+
+        // --- Modal Functions ---
+        async function openModalWithMovieDetails(movieTitle) {
+            console.log(`[Modal] Opening modal for: ${movieTitle}`);
+            selectedMovieForRating = movieTitle; // Set the currently selected movie for rating
+
+            modalPoster.src = ''; // Clear previous image
+            modalTitle.textContent = 'Loading...';
+            modalMetaInfo.textContent = '';
+            modalDirector.textContent = '';
+            modalCast.textContent = '';
+            modalOverview.textContent = '';
+            modalRatingMessage.textContent = '';
+            resetStarRating(); // Reset stars when opening modal
+
+            movieDetailsModalOverlay.classList.add('show');
 
             try {
-                const response = await fetch('/get_all_movies');
+                const response = await fetch(`/movie_details/${encodeURIComponent(movieTitle)}`);
                 if (!response.ok) {
-                    throw new Error('Failed to fetch movie list.');
+                    throw new Error(`Failed to fetch movie details: ${response.status}`);
                 }
-                const data = await response.json();
-                allMovieTitlesAndGenres = data.movies;
-                console.log("Movie data loaded for search suggestions.");
+                const movieDetails = await response.json();
+                console.log("[Modal] Movie details fetched:", movieDetails);
+
+                modalPoster.src = movieDetails.image_url || '{{ url_for('static', filename='placeholder.png') }}';
+                modalPoster.onerror = () => {
+                    console.error('Modal image failed to load:', modalPoster.src);
+                    modalPoster.src = '{{ url_for('static', filename='placeholder.png') }}';
+                };
+                modalTitle.textContent = movieDetails.title;
+                modalMetaInfo.innerHTML = `<strong>Release Date:</strong> ${movieDetails.release_date || 'N/A'} | <strong>Rating:</strong> ${movieDetails.vote_average ? movieDetails.vote_average.toFixed(1) : 'N/A'}/10`;
+                modalDirector.innerHTML = `<strong>Director:</strong> ${movieDetails.director || 'N/A'}`;
+                modalCast.innerHTML = `<strong>Cast:</strong> ${movieDetails.cast || 'N/A'}`;
+                modalOverview.textContent = movieDetails.overview || 'No overview available.';
+
+                // Pre-fill star rating if user has already rated this movie
+                const existingRating = userRatedMovies.find(r => r.movieTitle === movieTitle);
+                if (existingRating) {
+                    setStarRating(existingRating.rating);
+                    modalRatingMessage.textContent = `You rated this ${existingRating.rating}/5.`;
+                }
+
             } catch (error) {
-                console.error("Error loading movie data for search:", error);
-                document.getElementById('error-message').textContent = 'Error loading movie list for search. Please refresh.';
-                document.getElementById('error-message').classList.remove('hidden');
+                console.error('[Modal] Error loading movie details:', error);
+                modalTitle.textContent = 'Error loading details.';
+                modalOverview.textContent = 'Could not load movie details. Please try again.';
+                modalPoster.src = '{{ url_for('static', filename='placeholder.png') }}';
             }
-        });
-
-        const movieSearchInput = document.getElementById('movie-search');
-        const suggestionsList = document.getElementById('suggestions-list');
-        let selectedSuggestionIndex = -1; // To track keyboard navigation
-
-        // Function to filter and display suggestions as user types
-        movieSearchInput.addEventListener('input', () => {
-            const searchTerm = movieSearchInput.value.toLowerCase();
-            suggestionsList.innerHTML = ''; // Clear previous suggestions
-            suggestionsList.classList.add('hidden'); // Hide by default
-
-            if (searchTerm.length < 2) { // Only show suggestions if at least 2 characters typed
-                return;
-            }
-
-            const filteredMovies = allMovieTitlesAndGenres.filter(movie =>
-                movie.title.toLowerCase().includes(searchTerm)
-            ).slice(0, 10); // Limit to top 10 suggestions
-
-            if (filteredMovies.length > 0) {
-                filteredMovies.forEach((movie, index) => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = movie.title;
-                    listItem.dataset.title = movie.title; // Store full title
-                    listItem.dataset.genres = movie.genres; // Store genres
-                    listItem.addEventListener('click', () => {
-                        movieSearchInput.value = movie.title; // Set input value
-                        suggestionsList.classList.add('hidden'); // Hide suggestions
-                        displaySelectedMovieDetails(movie.title, movie.genres); // Display details
-                        selectedSuggestionIndex = -1; // Reset selection
-                    });
-                    suggestionsList.appendChild(listItem);
-                });
-                suggestionsList.classList.remove('hidden'); // Show suggestions
-                selectedSuggestionIndex = -1; // Reset selection on new input
-            }
-        });
-
-        // Handle keyboard navigation (Arrow Up/Down, Enter)
-        movieSearchInput.addEventListener('keydown', (e) => {
-            const suggestions = suggestionsList.children;
-            if (suggestions.length === 0) return;
-
-            if (e.key === 'ArrowDown') {
-                e.preventDefault(); // Prevent cursor from moving in input
-                if (selectedSuggestionIndex < suggestions.length - 1) {
-                    if (selectedSuggestionIndex !== -1) {
-                        suggestions[selectedSuggestionIndex].classList.remove('selected');
-                    }
-                    selectedSuggestionIndex++;
-                    suggestions[selectedSuggestionIndex].classList.add('selected');
-                    suggestions[selectedSuggestionIndex].scrollIntoView({ block: 'nearest' }); // Scroll into view
-                }
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault(); // Prevent cursor from moving in input
-                if (selectedSuggestionIndex > 0) {
-                    suggestions[selectedSuggestionIndex].classList.remove('selected');
-                    selectedSuggestionIndex--;
-                    suggestions[selectedSuggestionIndex].classList.add('selected');
-                    suggestions[selectedSuggestionIndex].scrollIntoView({ block: 'nearest' });
-                }
-            } else if (e.key === 'Enter') {
-                e.preventDefault(); // Prevent form submission
-                if (selectedSuggestionIndex !== -1) {
-                    const selectedMovie = suggestions[selectedSuggestionIndex];
-                    movieSearchInput.value = selectedMovie.dataset.title;
-                    suggestionsList.classList.add('hidden');
-                    displaySelectedMovieDetails(selectedMovie.dataset.title, selectedMovie.dataset.genres);
-                    selectedSuggestionIndex = -1;
-                } else {
-                    // If Enter is pressed without selecting from suggestions,
-                    // assume user wants to search for the current input value.
-                    getRecommendations();
-                }
-            } else if (e.key === 'Escape') {
-                suggestionsList.classList.add('hidden');
-                selectedSuggestionIndex = -1;
-            }
-        });
-
-        // Hide suggestions when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!movieSearchInput.contains(e.target) && !suggestionsList.contains(e.target)) {
-                suggestionsList.classList.add('hidden');
-            }
-        });
-
-        function displaySelectedMovieDetails(title, genres) {
-            const selectedMovieDetails = document.getElementById('selected-movie-details');
-            document.getElementById('selected-movie-title').textContent = title;
-            document.getElementById('selected-movie-genres').textContent = genres || 'N/A';
-            selectedMovieDetails.classList.remove('hidden');
         }
 
-        // Function to fetch recommendations from the backend
-        async function getRecommendations() {
-            const movieTitle = movieSearchInput.value.trim(); // Get movie from search input
-            const recommendationsList = document.getElementById('recommendations-list');
-            const recommendationsSection = document.getElementById('recommendations-section');
-            const loadingIndicator = document.getElementById('loading-indicator');
-            const errorMessage = document.getElementById('error-message');
+        function closeModal() {
+            movieDetailsModalOverlay.classList.remove('show');
+            selectedMovieForRating = null; // Clear selected movie
+        }
 
-            // Clear previous recommendations and error messages
-            recommendationsList.innerHTML = '';
-            recommendationsSection.classList.add('hidden');
-            errorMessage.classList.add('hidden'); // Hide error message
-            loadingIndicator.classList.remove('hidden'); // Show loading indicator
+        // --- Star Rating Functions ---
+        function resetStarRating() {
+            starRatingContainer.dataset.currentRating = "0";
+            starRatingContainer.querySelectorAll('i').forEach(star => {
+                star.classList.remove('fas');
+                star.classList.add('far');
+                star.classList.remove('hovered'); // Also remove hovered class
+            });
+        }
 
-            if (!movieTitle) {
-                errorMessage.textContent = 'Please enter a movie title.';
-                errorMessage.classList.remove('hidden');
-                loadingIndicator.classList.add('hidden');
+        function setStarRating(rating) {
+            starRatingContainer.dataset.currentRating = rating.toString();
+            starRatingContainer.querySelectorAll('i').forEach(star => {
+                const starValue = parseInt(star.dataset.value);
+                if (starValue <= rating) {
+                    star.classList.remove('far');
+                    star.classList.add('fas');
+                } else {
+                    star.classList.remove('fas');
+                    star.classList.add('far');
+                }
+            });
+        }
+
+        function handleStarHover(event) {
+            const hoveredStar = event.target.closest('i.fa-star');
+            if (hoveredStar) {
+                const value = parseInt(hoveredStar.dataset.value);
+                starRatingContainer.querySelectorAll('i').forEach(star => {
+                    const starValue = parseInt(star.dataset.value);
+                    if (starValue <= value) {
+                        star.classList.add('fas');
+                        star.classList.remove('far');
+                    } else {
+                        star.classList.add('far');
+                        star.classList.remove('fas');
+                    }
+                });
+            }
+        }
+
+        function handleStarOut() {
+            const currentRating = parseInt(starRatingContainer.dataset.currentRating);
+            setStarRating(currentRating); // Revert to the actual selected rating
+        }
+
+        function handleStarClick(event) {
+            const clickedStar = event.target.closest('i.fa-star');
+            if (clickedStar) {
+                const value = parseInt(clickedStar.dataset.value);
+                setStarRating(value);
+            }
+        }
+
+        // --- Core Functions ---
+
+        async function fetchMoviesForGrid(offset, limit) {
+            console.log(`[FetchMovies] Attempting to fetch movies: offset=${offset}, limit=${limit}, isLoading=${isLoadingMovies}, hasMore=${hasMoreMovies}`);
+            if (isLoadingMovies || !hasMoreMovies) {
+                console.log("[FetchMovies] Skipping fetch: Already loading or no more movies.");
                 return;
             }
+            isLoadingMovies = true;
+            loadingMoreIndicator.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`/get_all_movies?offset=${offset}&limit=${limit}`);
+                console.log("[FetchMovies] Response received from /get_all_movies:", response);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Failed to fetch movies for grid: ${response.status} - ${errorText}`);
+                }
+                const data = await response.json();
+                console.log("[FetchMovies] Parsed movie data:", data);
+                
+                allLoadedMovies = allLoadedMovies.concat(data.movies);
+                
+                filterMoviesBySearch(movieSearchInput.value.trim());
+
+                hasMoreMovies = data.has_more;
+                currentOffset += data.movies.length;
+                console.log(`[FetchMovies] Current offset: ${currentOffset}, Has more movies: ${hasMoreMovies}`);
+
+            } catch (error) {
+                console.error("[FetchMovies] Error fetching movies for grid:", error);
+                errorMessage.textContent = 'Error loading movies: ' + error.message;
+                errorMessage.classList.remove('hidden');
+            } finally {
+                isLoadingMovies = false;
+                loadingMoreIndicator.classList.add('hidden');
+            }
+        }
+
+        function renderMovieCards(moviesToRender) {
+            console.log("[RenderCards] Rendering", moviesToRender.length, "cards.");
+            moviesToRender.forEach(movie => {
+                const movieCard = document.createElement('div');
+                movieCard.classList.add('movie-card');
+                movieCard.dataset.title = movie.title; // Store title for modal lookup
+
+                // Log the image URL to console for debugging
+                console.log(`[ImageDebug] Attempting to load image for "${movie.title}": ${movie.image_url}`);
+
+                movieCard.innerHTML = `
+                    <img src="${movie.image_url}" alt="${movie.title} Poster" 
+                         onerror="console.error('Image failed to load:', this.src); this.src='{{ url_for('static', filename='placeholder.png') }}';" />
+                    <div class="movie-card-content">
+                        <div class="movie-card-title">${movie.title}</div>
+                        <div class="movie-card-genres">${movie.genres || 'N/A'}</div>
+                    </div>
+                `;
+                // Add click listener to open modal with details
+                movieCard.addEventListener('click', () => {
+                    openModalWithMovieDetails(movie.title);
+                });
+                movieCardsContainer.appendChild(movieCard);
+            });
+        }
+
+        function handleInfiniteScroll() {
+            if (movieSearchInput.value.trim() === "" && (window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500 && !isLoadingMovies && hasMoreMovies) {
+                console.log("[InfiniteScroll] Triggered. Fetching more movies.");
+                fetchMoviesForGrid(currentOffset, moviesPerLoad);
+            } else if (movieSearchInput.value.trim() !== "") {
+                console.log("[InfiniteScroll] Skipped because search term is active.");
+            }
+        }
+
+        function handleSearchInput() {
+            const searchTerm = movieSearchInput.value.toLowerCase();
+            console.log("[SearchInput] Search input changed:", searchTerm);
+            filterMoviesBySearch(searchTerm);
+        }
+
+        function filterMoviesBySearch(searchTerm) {
+            const lowerCaseSearchTerm = searchTerm.toLowerCase();
+            console.log("[FilterSearch] Filtering movies by search term:", lowerCaseSearchTerm);
+            
+            if (lowerCaseSearchTerm.length < 2) {
+                displayedMovies = allLoadedMovies;
+            } else {
+                displayedMovies = allLoadedMovies.filter(movie =>
+                    movie.title.toLowerCase().includes(lowerCaseSearchTerm) ||
+                    (movie.genres && movie.genres.toLowerCase().includes(lowerCaseSearchTerm))
+                );
+            }
+            updateMovieGrid();
+        }
+
+        function updateMovieGrid() {
+            console.log("[UpdateGrid] Updating movie grid with", displayedMovies.length, "movies.");
+            movieCardsContainer.innerHTML = '';
+            renderMovieCards(displayedMovies);
+        }
+
+        // Function to fetch SIMILAR recommendations from the backend
+        async function getSimilarRecommendations() {
+            // Get movie title from the modal's title, as this is now the primary interaction point
+            const movieTitle = modalTitle.textContent.trim();
+            console.log("[GetSimilarRecommendations] Button clicked for movie:", movieTitle);
+            
+            recommendationsList.innerHTML = '';
+            recommendationsSection.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            loadingIndicator.classList.remove('hidden');
+
+            if (!movieTitle || movieTitle === 'Loading...') {
+                errorMessage.textContent = 'Please select a movie from the grid first.';
+                errorMessage.classList.remove('hidden');
+                loadingIndicator.classList.add('hidden');
+                console.log("[GetSimilarRecommendations] No movie selected for recommendations.");
+                return;
+            }
+
+            loadingIndicator.classList.remove('hidden');
 
             try {
                 const response = await fetch('/recommend', {
@@ -368,30 +897,168 @@
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to fetch recommendations.');
+                    throw new Error(errorData.error || `Failed to fetch similar recommendations. Status: ${response.status}`);
                 }
 
                 const data = await response.json();
                 const recommendations = data.recommendations;
+                console.log("[GetSimilarRecommendations] Recommendations received:", recommendations);
 
                 if (recommendations && recommendations.length > 0) {
-                    recommendations.forEach(movie => {
+                    recommendations.forEach(recMovie => {
                         const listItem = document.createElement('li');
-                        listItem.textContent = movie;
+                        // Use the image_url directly from the recommended movie data
+                        const imageUrl = recMovie.image_url || '{{ url_for('static', filename='placeholder.png') }}';
+                        
+                        console.log(`[ImageDebug] Attempting to load recommended image for "${recMovie.title}": ${imageUrl}`);
+
+                        listItem.innerHTML = `
+                            <img src="${imageUrl}" alt="${recMovie.title} Poster" onerror="console.error('Recommended image failed to load:', this.src); this.src='{{ url_for('static', filename='placeholder.png') }}';" />
+                            <span>${recMovie.title}</span>
+                        `;
                         recommendationsList.appendChild(listItem);
                     });
                     recommendationsSection.classList.remove('hidden');
                 } else {
-                    recommendationsList.innerHTML = '<li class="col-span-full text-center text-gray-500">No recommendations found for this movie. Try another!</li>';
+                    recommendationsList.innerHTML = '<li class="col-span-full text-center text-gray-500">No similar recommendations found for this movie. Try another!</li>';
                     recommendationsSection.classList.remove('hidden');
                 }
             } catch (error) {
-                console.error('Error fetching recommendations:', error);
+                console.error('[GetSimilarRecommendations] Error fetching similar recommendations:', error);
                 errorMessage.textContent = 'Error: ' + error.message;
                 errorMessage.classList.remove('hidden');
                 recommendationsSection.classList.add('hidden');
             } finally {
-                loadingIndicator.classList.add('hidden'); // Hide loading indicator
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        // --- Firebase/Firestore Functions ---
+
+        async function rateMovie() {
+            if (!userId) {
+                modalRatingMessage.textContent = 'Please wait, authenticating...';
+                return;
+            }
+            if (!selectedMovieForRating) {
+                modalRatingMessage.textContent = 'No movie selected to rate.';
+                return;
+            }
+
+            const rating = parseInt(starRatingContainer.dataset.currentRating); // Get rating from star system
+
+            if (isNaN(rating) || rating < 1 || rating > 5) {
+                modalRatingMessage.textContent = 'Please select a rating between 1 and 5 stars.';
+                return;
+            }
+
+            try {
+                if (userId) {
+                    const ratingDocRef = doc(db, `users/${userId}/ratings`, selectedMovieForRating.replace(/[^a-zA-Z0-9]/g, '_'));
+                    await setDoc(ratingDocRef, {
+                        movieTitle: selectedMovieForRating,
+                        rating: rating,
+                        timestamp: new Date()
+                    }, { merge: true });
+
+                    modalRatingMessage.textContent = `Successfully rated "${selectedMovieForRating}" as ${rating}/5!`;
+                    console.log(`Rating saved: ${selectedMovieForRating} - ${rating} by user ${userId}`);
+                    // After rating, refresh personalized recommendations
+                    fetchAndDisplayPersonalizedRecommendations(userRatedMovies); 
+                } else {
+                    console.warn("Firebase: userId not available yet for saving rating.");
+                    modalRatingMessage.textContent = 'Authentication in progress, please try rating again in a moment.';
+                }
+
+            } catch (error) {
+                console.error("Error saving rating:", error);
+                modalRatingMessage.textContent = 'Error saving rating. Please check Firebase setup in console.';
+            }
+        }
+
+        function loadUserRatings() {
+            if (!userId) {
+                console.log("User not authenticated yet, cannot load ratings.");
+                return;
+            }
+
+            const q = collection(db, `users/${userId}/ratings`);
+            onSnapshot(q, (snapshot) => {
+                userRatingsList.innerHTML = '';
+                userRatedMovies = []; // Clear previous ratings
+                if (snapshot.empty) {
+                    noRatingsMessage.classList.remove('hidden');
+                    userRatingsSection.classList.add('hidden');
+                    personalizedRecommendationsSection.classList.add('hidden'); // Hide personalized recs if no ratings
+                } else {
+                    noRatingsMessage.classList.add('hidden');
+                    userRatingsSection.classList.remove('hidden');
+                    snapshot.forEach((doc) => {
+                        const ratingData = doc.data();
+                        userRatedMovies.push(ratingData); // Store for personalized recommendations
+                        const listItem = document.createElement('li');
+                        listItem.innerHTML = `<strong>${ratingData.movieTitle}</strong>: ${ratingData.rating} / 5`;
+                        userRatingsList.appendChild(listItem);
+                    });
+                    console.log("User ratings updated:", userRatedMovies);
+                    // Trigger personalized recommendations after ratings are loaded
+                    fetchAndDisplayPersonalizedRecommendations(userRatedMovies);
+                }
+            }, (error) => {
+                console.error("Error fetching user ratings:", error);
+                noRatingsMessage.textContent = 'Error loading your ratings.';
+                noRatingsMessage.classList.remove('hidden');
+            });
+        }
+
+        async function fetchAndDisplayPersonalizedRecommendations(ratedMovies) {
+            console.log("[PersonalizedRecs] Fetching personalized recommendations based on:", ratedMovies.length, "rated movies.");
+            personalizedRecommendationsList.innerHTML = '';
+            personalizedRecommendationsSection.classList.add('hidden');
+            noPersonalizedRecsMessage.classList.add('hidden');
+
+            if (ratedMovies.length === 0) {
+                noPersonalizedRecsMessage.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const response = await fetch('/personalized_recommendations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ rated_movies: ratedMovies }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Failed to fetch personalized recommendations. Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const personalizedRecommendations = data.recommendations;
+                console.log("[PersonalizedRecs] Personalized recommendations received:", personalizedRecommendations);
+
+                if (personalizedRecommendations && personalizedRecommendations.length > 0) {
+                    personalizedRecommendations.forEach(recMovie => {
+                        const listItem = document.createElement('li');
+                        const imageUrl = recMovie.image_url || '{{ url_for('static', filename='placeholder.png') }}';
+                        
+                        listItem.innerHTML = `
+                            <img src="${imageUrl}" alt="${recMovie.title} Poster" onerror="this.src='{{ url_for('static', filename='placeholder.png') }}';" />
+                            <span>${recMovie.title}</span>
+                        `;
+                        personalizedRecommendationsList.appendChild(listItem);
+                    });
+                    personalizedRecommendationsSection.classList.remove('hidden');
+                } else {
+                    noPersonalizedRecsMessage.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('[PersonalizedRecs] Error fetching personalized recommendations:', error);
+                noPersonalizedRecsMessage.textContent = 'Error loading personalized recommendations.';
+                noPersonalizedRecsMessage.classList.remove('hidden');
             }
         }
     </script>
